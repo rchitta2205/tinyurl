@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = ".;proto";
+
+
+message UrlRequest {
+  string url = 1;
+}
+
+message UrlResponse {
+  string url = 1;
+}
+
+service TinyUrlService {
+  rpc Create(UrlRequest) returns (UrlResponse) {
+    option (google.api.http) = {
+      post: "/v1/longurl"
+      body: "*"
+    };
+  };
+  rpc Fetch(UrlRequest) returns (UrlResponse) {
+    option (google.api.http) = {
+      get: "/v1/tinyurl"
+    };
+  };
+}
