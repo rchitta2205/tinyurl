@@ -31,7 +31,7 @@ func (w *tinyUrlApplication) Create(longUrl string) string {
 	for {
 		tinyUrl = w.generateKey()
 		_, err := w.store.Fetch(tinyUrl)
-		if err == nil {
+		if err != nil {
 			break
 		}
 	}

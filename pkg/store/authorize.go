@@ -16,8 +16,8 @@ type user struct {
 var (
 	methodDb = method{
 		permissions: map[string][]string{
-			"/TinyUrlService/Create":  {"admin", "user"},
-			"/TinyUrlService/Fetch":   {"admin"},
+			"/TinyUrlService/Create": {"admin"},
+			"/TinyUrlService/Fetch":  {"admin", "user"},
 		},
 	}
 
@@ -53,7 +53,7 @@ func (a *authStore) Authorize(username, method string) (bool, error) {
 	}
 
 	for _, currRole := range acceptableRoles {
-		if currRole == role{
+		if currRole == role {
 			return true, nil
 		}
 	}

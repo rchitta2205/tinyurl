@@ -42,7 +42,7 @@ func (interceptor *AuthInterceptor) StreamAuthInterceptor(srv interface{}, strea
 }
 
 func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string) error {
-	interceptor.logEntry.Info("Authenticating and authorizing client and server certificates")
+	interceptor.logEntry.Info("Authenticating and authorizing user...")
 	peerObj, ok := peer.FromContext(ctx)
 	if !ok {
 		return errors.New("error to read peer information")
