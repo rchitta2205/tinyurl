@@ -42,7 +42,8 @@ func (c *client) Register() error {
 
 	// Initialize all the used commands in the application
 	c.cmds = map[string]api.Command{
-		"start": cmdMgr.CreateCommand(),
+		"create": cmdMgr.CreateCommand(),
+		"fetch":  cmdMgr.FetchCommand(),
 	}
 
 	return nil

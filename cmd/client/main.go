@@ -17,16 +17,19 @@ func main() {
 
 	err := client.Register()
 	if err != nil {
+		logEntry.Info(err.Error())
 		os.Exit(-1)
 	}
 
 	err = client.Run()
 	if err != nil {
+		logEntry.Info(err.Error())
 		os.Exit(-1)
 	}
 
 	err = client.Release()
 	if err != nil {
+		logEntry.Info(err.Error())
 		os.Exit(-1)
 	}
 }
