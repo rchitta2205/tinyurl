@@ -52,7 +52,7 @@ func (s *service) Register() error {
 	}
 
 	// Create all the interceptors
-	authInterceptor := auth.NewAuthInterceptor(appMgr.AuthApplication())
+	authInterceptor := auth.NewAuthInterceptor(appMgr.AuthApplication(), s.logEntry)
 
 	// Add all the unary interceptors
 	unaryInterceptors = append(unaryInterceptors, authInterceptor.UnaryAuthInterceptor)

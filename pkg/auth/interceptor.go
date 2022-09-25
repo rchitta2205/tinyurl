@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -14,13 +15,15 @@ import (
 
 // AuthInterceptor is a server interceptor for authorization
 type AuthInterceptor struct {
-	authApp datamodel.AuthApplication
+	authApp  datamodel.AuthApplication
+	logEntry *logrus.Entry
 }
 
 // NewInterceptor returns a new auth interceptor
-func NewAuthInterceptor(authApp datamodel.AuthApplication) *AuthInterceptor {
+func NewAuthInterceptor(authApp datamodel.AuthApplication, logEntry *logrus.Entry) *AuthInterceptor {
 	return &AuthInterceptor{
-		authApp: authApp,
+		authApp:  authApp,
+		logEntry: logEntry,
 	}
 }
 
@@ -39,6 +42,7 @@ func (interceptor *AuthInterceptor) StreamAuthInterceptor(srv interface{}, strea
 }
 
 func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string) error {
+	interceptor.logEntry.Info("Authenticating and authorizing client and server certificates")
 	peerObj, ok := peer.FromContext(ctx)
 	if !ok {
 		return errors.New("error to read peer information")
