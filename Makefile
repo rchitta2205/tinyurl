@@ -1,4 +1,4 @@
-.PHONY: protobuf cert service client vendor
+.PHONY: protobuf cert service client vendor build up down
 
 vendor:
 	go mod tidy && go mod vendor
@@ -15,3 +15,11 @@ service:
 client:
 	go build -o ./bin/tiny-url-client cmd/client/main.go
 
+build:
+	@docker-compose build
+
+up: build
+	@docker-compose up
+
+down:
+	@docker-compose down

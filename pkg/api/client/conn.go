@@ -3,13 +3,11 @@ package client
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
-	"fmt"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/credentials"
-	"io/ioutil"
 	"time"
 	"tinyurl/pkg/config"
+	"tinyurl/pkg/util"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
@@ -38,17 +36,26 @@ func (c *clientConn) dial() error {
 	bc.MaxDelay = grpcBackOffPolicyMaxDelay
 
 	// Load client side tls credentials
-	tlsCredentials, err := c.loadTLSCredentials()
+	cert, certPool, err := util.LoadTLSCredentials(c.cfg.CertAuthority, c.cfg.ClientCertificate, c.cfg.ClientKey)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		RootCAs:      certPool,
+		MinVersion:   tls.VersionTLS13,
+	}
 
 	opts := []grpc.DialOption{
 		grpc.WithBlock(),
 		grpc.WithConnectParams(grpc.ConnectParams{
 			Backoff: bc,
 		}),
-		grpc.WithTransportCredentials(tlsCredentials),
+		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 	}
 
-	c.conn, err = grpc.DialContext(c.ctx, c.cfg.ServerAddress, opts...)
+	c.conn, err = grpc.DialContext(c.ctx, c.cfg.GrpcServerAddress, opts...)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -58,34 +65,6 @@ func (c *clientConn) dial() error {
 
 func (c *clientConn) getGrpcConn() *grpc.ClientConn {
 	return c.conn
-}
-
-func (c *clientConn) loadTLSCredentials() (credentials.TransportCredentials, error) {
-	// Load certificate of the CA who signed server's certificate
-	pemServerCA, err := ioutil.ReadFile(c.cfg.CertAuthority)
-	if err != nil {
-		return nil, err
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(pemServerCA) {
-		return nil, fmt.Errorf("failed to add server CA's certificate %v", pemServerCA)
-	}
-
-	// Load client's certificate and private key
-	clientCert, err := tls.LoadX509KeyPair(c.cfg.ClientCertificate, c.cfg.ClientKey)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create the credentials and return it
-	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{clientCert},
-		RootCAs:      certPool,
-		MinVersion:   tls.VersionTLS13,
-	}
-
-	return credentials.NewTLS(tlsConfig), nil
 }
 
 func (c *clientConn) release() error {

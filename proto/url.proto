@@ -23,7 +23,8 @@ service TinyUrlService {
   };
   rpc Fetch(UrlRequest) returns (UrlResponse) {
     option (google.api.http) = {
-      get: "/v1/tinyurl"
+      post: "/v1/tinyurl"
+      body: "*"
     };
   };
 }

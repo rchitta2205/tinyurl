@@ -42,7 +42,13 @@ func (w *tinyUrlApplication) Create(longUrl string) string {
 }
 
 func (w *tinyUrlApplication) Fetch(tinyUrl string) (string, error) {
-	_, err := neturl.ParseRequestURI(tinyUrl)
+	tinyUrl, err := neturl.PathUnescape(tinyUrl)
+	if err != nil {
+		return "", errors.Wrapf(err, messages.ErrInvalidUrl, tinyUrl)
+	}
+
+	w.logEntry.Info(tinyUrl)
+	_, err = neturl.ParseRequestURI(tinyUrl)
 	if err != nil {
 		return "", errors.Wrapf(err, messages.ErrInvalidUrl, tinyUrl)
 	}
@@ -52,6 +58,7 @@ func (w *tinyUrlApplication) Fetch(tinyUrl string) (string, error) {
 		return "", errors.WithStack(err)
 	}
 
+	w.logEntry.Info(longUrl)
 	return longUrl, nil
 }
 

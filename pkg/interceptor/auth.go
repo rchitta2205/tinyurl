@@ -1,4 +1,4 @@
-package auth
+package interceptor
 
 import (
 	"context"
@@ -27,22 +27,22 @@ func NewAuthInterceptor(authApp datamodel.AuthApplication, logEntry *logrus.Entr
 	}
 }
 
-func (interceptor *AuthInterceptor) UnaryAuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	if err := interceptor.authorize(ctx, info.FullMethod); err != nil {
+func (auth *AuthInterceptor) UnaryAuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	if err := auth.authorize(ctx, info.FullMethod); err != nil {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	return handler(ctx, req)
 }
 
-func (interceptor *AuthInterceptor) StreamAuthInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	if err := interceptor.authorize(stream.Context(), info.FullMethod); err != nil {
+func (auth *AuthInterceptor) StreamAuthInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	if err := auth.authorize(stream.Context(), info.FullMethod); err != nil {
 		return status.Error(codes.PermissionDenied, err.Error())
 	}
 	return handler(srv, stream)
 }
 
-func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string) error {
-	interceptor.logEntry.Info("Authenticating and authorizing user...")
+func (auth *AuthInterceptor) authorize(ctx context.Context, method string) error {
+	auth.logEntry.Info("Authenticating and authorizing user...")
 	peerObj, ok := peer.FromContext(ctx)
 	if !ok {
 		return errors.New("error to read peer information")
@@ -63,7 +63,7 @@ func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string
 
 	userName := certs[0][0].Subject.CommonName
 
-	res, err := interceptor.authApp.Authorize(userName, method)
+	res, err := auth.authApp.Authorize(userName, method)
 	if err != nil {
 		return errors.WithStack(err)
 	}
