@@ -26,6 +26,7 @@ func NewTinyUrlApplication(store datamodel.TinyUrlStore, logEntry *logrus.Entry)
 }
 
 func (w *tinyUrlApplication) Create(longUrl string) string {
+	var prefixUrl = "http://www.tinyurl/"
 	var tinyUrl string
 	for {
 		tinyUrl = w.generateKey()
@@ -34,6 +35,8 @@ func (w *tinyUrlApplication) Create(longUrl string) string {
 			break
 		}
 	}
+	tinyUrl = prefixUrl + tinyUrl
+	w.logEntry.Infof("Generated Url %s", tinyUrl)
 	w.store.Create(tinyUrl, longUrl)
 	return tinyUrl
 }
