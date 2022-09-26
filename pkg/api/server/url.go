@@ -22,7 +22,10 @@ func NewTinyUrlServer(app datamodel.TinyUrlApplication) (proto.TinyUrlServiceSer
 
 func (s *tinyUrlServer) Create(ctx context.Context, r *proto.UrlRequest) (*proto.UrlResponse, error) {
 	longUrl := r.GetUrl()
-	tinyUrl := s.app.Create(longUrl)
+	tinyUrl, err := s.app.Create(longUrl)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	res := &proto.UrlResponse{
 		Url: tinyUrl,
 	}

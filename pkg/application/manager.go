@@ -11,7 +11,7 @@ type applicationManager struct {
 
 	// List of all singleton applications
 	tinyUrlApplication datamodel.TinyUrlApplication
-	authApplication   datamodel.AuthApplication
+	authApplication    datamodel.AuthApplication
 }
 
 func NewApplicationManager(logEntry *logrus.Entry, storeManager datamodel.StoreManager) datamodel.ApplicationManager {

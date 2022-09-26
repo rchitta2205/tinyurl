@@ -9,4 +9,7 @@ const (
 	clientKeyPath  = "cert/client-alice-key.pem"
 	serverCertPath = "cert/server-cert.pem"
 	serverKeyPath  = "cert/server-key.pem"
+	dbAddr         = "mongodb://db:27017"
+	dbName         = "database"
+	cacheAddr      = "cache:6379"
 )

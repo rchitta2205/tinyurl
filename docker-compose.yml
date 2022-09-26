@@ -3,11 +3,14 @@ services:
   app:
     build: .
     container_name: app
-    network_mode: bridge
     ports:
       - 8081:8081
     depends_on:
       - db
+      - cache
+  cache:
+    image: redis:6.0.8
+    container_name: cache
   db:
     image: mongo:4.4.5
     container_name: db

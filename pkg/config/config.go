@@ -7,9 +7,12 @@ type Config struct {
 	CertAuthority     string
 	ServerCertificate string
 	ServerKey         string
-
 	ClientCertificate string
 	ClientKey         string
+
+	DbAddr    string
+	DbName    string
+	CacheAddr string
 }
 
 func NewConfig() Config {
@@ -21,5 +24,8 @@ func NewConfig() Config {
 	cfg.ServerKey = serverKeyPath
 	cfg.ClientCertificate = clientCertPath
 	cfg.ClientKey = clientKeyPath
+	cfg.DbAddr = dbAddr
+	cfg.DbName = dbName
+	cfg.CacheAddr = cacheAddr
 	return cfg
 }

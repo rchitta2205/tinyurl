@@ -11,6 +11,7 @@ import (
 
 const (
 	keyCombinations = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	prefixUrl       = "http://www.tinyurl/"
 )
 
 type tinyUrlApplication struct {
@@ -25,20 +26,39 @@ func NewTinyUrlApplication(store datamodel.TinyUrlStore, logEntry *logrus.Entry)
 	}
 }
 
-func (w *tinyUrlApplication) Create(longUrl string) string {
-	var prefixUrl = "http://www.tinyurl/"
+func (w *tinyUrlApplication) Create(longUrl string) (string, error) {
+	longUrl, err := neturl.PathUnescape(longUrl)
+	if err != nil {
+		return "", errors.Wrapf(err, messages.ErrInvalidUrl, longUrl)
+	}
+
+	_, err = neturl.ParseRequestURI(longUrl)
+	if err != nil {
+		return "", errors.Wrapf(err, messages.ErrInvalidUrl, longUrl)
+	}
+
 	var tinyUrl string
 	for {
 		tinyUrl = w.generateKey()
-		_, err := w.store.Fetch(tinyUrl)
-		if err != nil {
+		_, terr := w.store.Fetch(tinyUrl)
+		if terr != nil {
 			break
 		}
 	}
+
 	tinyUrl = prefixUrl + tinyUrl
-	w.logEntry.Infof("Generated Url %s", tinyUrl)
-	w.store.Create(tinyUrl, longUrl)
-	return tinyUrl
+	url := datamodel.Url{
+		TinyUrl: tinyUrl,
+		LongUrl: longUrl,
+	}
+
+	err = w.store.Create(url)
+	if err != nil {
+		return "", errors.WithStack(err)
+	}
+
+	w.logEntry.Infof("Generated tiny url %s", tinyUrl)
+	return tinyUrl, nil
 }
 
 func (w *tinyUrlApplication) Fetch(tinyUrl string) (string, error) {
@@ -47,7 +67,6 @@ func (w *tinyUrlApplication) Fetch(tinyUrl string) (string, error) {
 		return "", errors.Wrapf(err, messages.ErrInvalidUrl, tinyUrl)
 	}
 
-	w.logEntry.Info(tinyUrl)
 	_, err = neturl.ParseRequestURI(tinyUrl)
 	if err != nil {
 		return "", errors.Wrapf(err, messages.ErrInvalidUrl, tinyUrl)
@@ -58,7 +77,7 @@ func (w *tinyUrlApplication) Fetch(tinyUrl string) (string, error) {
 		return "", errors.WithStack(err)
 	}
 
-	w.logEntry.Info(longUrl)
+	w.logEntry.Infof("Fetched long url %s", longUrl)
 	return longUrl, nil
 }
 

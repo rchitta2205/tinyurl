@@ -3,9 +3,11 @@ package pkg
 import (
 	"context"
 	"crypto/tls"
+	"github.com/go-redis/redis"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/codes"
@@ -32,6 +34,8 @@ type grpcService struct {
 	grpcServer *grpc.Server
 	cfg        config.Config
 	logEntry   *logrus.Entry
+	db         *mongo.Client
+	cache      *redis.Client
 }
 
 type restService struct {
@@ -41,11 +45,14 @@ type restService struct {
 	logEntry   *logrus.Entry
 }
 
-func NewGrpcService(ctx context.Context, cfg config.Config, logEntry *logrus.Entry) Service {
+func NewGrpcService(ctx context.Context, cfg config.Config,
+	logEntry *logrus.Entry, db *mongo.Client, cache *redis.Client) Service {
 	return &grpcService{
 		ctx:      ctx,
 		cfg:      cfg,
 		logEntry: logEntry,
+		db:       db,
+		cache:    cache,
 	}
 }
 
@@ -62,7 +69,11 @@ func (s *grpcService) Register() error {
 	var streamInterceptors []grpc.StreamServerInterceptor
 
 	// Create the application manager
-	appMgr, err := NewApplicationManagerBuilder(s.logEntry).Build()
+	appMgr, err := NewApplicationManagerBuilder(s.ctx).
+		WithLogEntry(s.logEntry).
+		WithDb(s.db).
+		WithDbName(s.cfg.DbName).
+		WithCache(s.cache).Build()
 	if err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}
