@@ -1,8 +1,8 @@
 package config
 
 type Config struct {
-	GrpcServerAddress string
-	RestServerAddress string
+	GrpcServerPort string
+	RestServerPort string
 
 	CertAuthority     string
 	ServerCertificate string
@@ -14,8 +14,8 @@ type Config struct {
 
 func NewConfig() Config {
 	cfg := Config{}
-	cfg.GrpcServerAddress = grpcServerAddress
-	cfg.RestServerAddress = restServerAddress
+	cfg.GrpcServerPort = grpcServerPort
+	cfg.RestServerPort = restServerPort
 	cfg.CertAuthority = caPath
 	cfg.ServerCertificate = serverCertPath
 	cfg.ServerKey = serverKeyPath

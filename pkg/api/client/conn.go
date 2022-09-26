@@ -55,7 +55,7 @@ func (c *clientConn) dial() error {
 		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 	}
 
-	c.conn, err = grpc.DialContext(c.ctx, c.cfg.GrpcServerAddress, opts...)
+	c.conn, err = grpc.DialContext(c.ctx, c.cfg.GrpcServerPort, opts...)
 	if err != nil {
 		return errors.WithStack(err)
 	}

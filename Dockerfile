@@ -6,6 +6,8 @@ RUN go build -o ./bin/tiny-url-service cmd/service/main.go
 RUN go build -o ./bin/tiny-url-client cmd/client/main.go
 
 FROM alpine:3.13.5
-COPY --from=GO_BUILD /tinyurl ./
+COPY --from=GO_BUILD /tinyurl ./tinyurl
+WORKDIR /tinyurl
+RUN pwd
 RUN ls
 CMD ./bin/tiny-url-service

@@ -25,7 +25,7 @@ func main() {
 		logEntry.Fatalf("Failed to create grpc server object and register apps: %+v", err.Error())
 	}
 
-	grpcLis, err := grpcService.Serve(wg)
+	err = grpcService.Serve(wg)
 	if err != nil {
 		logEntry.Fatalf("Failed to start the gRPC server: %+v", err.Error())
 	}
@@ -35,23 +35,11 @@ func main() {
 		logEntry.Fatalf("Failed to create rest server and register apps: %+v", err.Error())
 	}
 
-	httpLis, err := restService.Serve(wg)
+	err = restService.Serve(wg)
 	if err != nil {
 		logEntry.Fatalf("Failed to start the rest server: %+v", err.Error())
 	}
 
 	// Wait for all goroutines to be completed
 	wg.Wait()
-
-	// Close the grpc listener
-	err = grpcLis.Close()
-	if err != nil {
-		logEntry.Fatalf("Failed to close grpc listener")
-	}
-
-	// Close the http listener
-	err = httpLis.Close()
-	if err != nil {
-		logEntry.Fatalf("Failed to close rest listener")
-	}
 }

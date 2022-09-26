@@ -24,7 +24,7 @@ import (
 
 type Service interface {
 	Register() error
-	Serve(*sync.WaitGroup) (net.Listener, error)
+	Serve(*sync.WaitGroup) error
 }
 
 type grpcService struct {
@@ -110,10 +110,10 @@ func (s *grpcService) Register() error {
 	return nil
 }
 
-func (s *grpcService) Serve(wg *sync.WaitGroup) (net.Listener, error) {
-	grpcLis, err := net.Listen("tcp", s.cfg.GrpcServerAddress)
+func (s *grpcService) Serve(wg *sync.WaitGroup) error {
+	grpcLis, err := net.Listen("tcp", s.cfg.GrpcServerPort)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
 	reflection.Register(s.grpcServer)
@@ -126,7 +126,7 @@ func (s *grpcService) Serve(wg *sync.WaitGroup) (net.Listener, error) {
 		s.logEntry.Warn("Grpc Server: " + err.Error())
 	}()
 
-	return grpcLis, errors.WithStack(err)
+	return errors.WithStack(err)
 }
 
 func (s *restService) Register() error {
@@ -155,13 +155,14 @@ func (s *restService) Register() error {
 	}
 
 	// Setting up a dial-up for gRPC service by specifying endpoint/target url
-	err = proto.RegisterTinyUrlServiceHandlerFromEndpoint(s.ctx, mux, s.cfg.GrpcServerAddress, options)
+	err = proto.RegisterTinyUrlServiceHandlerFromEndpoint(s.ctx, mux, s.cfg.GrpcServerPort, options)
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
 	// Creating an HTTP server
 	s.restServer = &http.Server{
+		Addr:    s.cfg.RestServerPort,
 		Handler: mux,
 	}
 
@@ -169,19 +170,14 @@ func (s *restService) Register() error {
 	return nil
 }
 
-func (s *restService) Serve(wg *sync.WaitGroup) (net.Listener, error) {
-	httpLis, err := net.Listen("tcp", s.cfg.RestServerAddress)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
+func (s *restService) Serve(wg *sync.WaitGroup) error {
+	var err error
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		s.logEntry.Info("Starting REST server...")
-		err = s.restServer.Serve(httpLis)
+		err = s.restServer.ListenAndServe()
 		s.logEntry.Warn("Rest Server: " + err.Error())
 	}()
-
-	return httpLis, errors.WithStack(err)
+	return errors.WithStack(err)
 }

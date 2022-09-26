@@ -3,6 +3,7 @@ services:
   app:
     build: .
     container_name: app
+    network_mode: bridge
     ports:
       - 8081:8081
     depends_on:
