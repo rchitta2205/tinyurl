@@ -1,0 +1,46 @@
+{{- $appName := .Chart.Name }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $appName }}-tinyurl-svc
+  labels:
+    name: {{ $appName }}-tinyurl-svc
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+      protocol: TCP
+      name: http
+  selector:
+    name: {{ $appName }}-tinyurl-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $appName }}-redis-svc
+  labels:
+    name: {{ $appName }}-redis-svc
+spec:
+  ports:
+    - name: redis
+      port: {{ .Values.redis.port }}
+      targetPort: {{ .Values.redis.port }}
+      protocol: TCP
+  selector:
+    name: {{ $appName }}-redis-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $appName }}-mongo-svc
+  labels:
+    name: {{ $appName }}-mongo-svc
+spec:
+  ports:
+    - name: mongodb
+      port: {{ .Values.mongo.port }}
+      targetPort: {{ .Values.mongo.port }}
+      protocol: TCP
+  selector:
+    name: {{ $appName }}-mongo-svc

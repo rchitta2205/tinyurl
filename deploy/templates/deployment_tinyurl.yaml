@@ -1,0 +1,30 @@
+{{- $appName := .Chart.Name }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $appName }}-tinyurl
+  labels:
+    name: {{ $appName }}-tinyurl-svc
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      name: {{ $appName }}-tinyurl-svc
+  template:
+    metadata:
+      labels:
+        name: {{ $appName }}-tinyurl-svc
+    spec:
+      containers:
+        - name: {{ $appName }}-tinyurl
+          image: "{{ .Values.image.tinyurl.repository }}:{{ .Values.image.tinyurl.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ $appName }}-tinyurl
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP

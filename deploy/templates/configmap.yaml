@@ -1,0 +1,8 @@
+{{- $appName := .Chart.Name }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-tinyurl
+data:
+  MONGODB_SERVICE: "{{ $appName }}-mongo-svc"
+  REDIS_SERVICE: "{{ $appName }}-redis-svc"

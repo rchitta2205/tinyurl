@@ -2,14 +2,15 @@ package config
 
 const (
 	// ServerAddress is the default address for the gRPC server, if no override is specified in the flags
-	grpcServerPort = ":8080"
-	restServerPort = ":8081"
+	grpcServerPort = ":8081"
+	restServerPort = ":8080"
 	caPath         = "cert/ca-cert.pem"
 	clientCertPath = "cert/client-alice-cert.pem"
 	clientKeyPath  = "cert/client-alice-key.pem"
 	serverCertPath = "cert/server-cert.pem"
 	serverKeyPath  = "cert/server-key.pem"
-	dbAddr         = "mongodb://db:27017"
+	dbUrl          = "mongodb://"
+	dbPort         = ":27017"
 	dbName         = "database"
-	cacheAddr      = "cache:6379"
+	cachePort      = ":6379"
 )

@@ -1,0 +1,28 @@
+{{- $appName := .Chart.Name }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $appName }}-mongo
+  labels:
+    name: {{ $appName }}-mongo-svc
+spec:
+  replicas: {{ .Values.mongo.replica }}
+  selector:
+    matchLabels:
+      name: {{ $appName }}-mongo-svc
+  template:
+    metadata:
+      labels:
+        name: {{ $appName }}-mongo-svc
+    spec:
+      containers:
+        - name: {{ $appName }}-mongo
+          image: "{{ .Values.image.mongo.repository }}:{{ .Values.image.mongo.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: MONGO_INITDB_DATABASE
+              value: '{{ .Values.mongo.initDb }}'
+          ports:
+            - name: http
+              containerPort: {{ .Values.mongo.port }}
+              protocol: TCP

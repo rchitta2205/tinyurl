@@ -1,4 +1,4 @@
-.PHONY: protobuf cert service client vendor build up down
+.PHONY: protobuf cert service client vendor build up down install uninstall
 
 vendor:
 	go mod tidy && go mod vendor
@@ -23,3 +23,9 @@ up: build
 
 down:
 	@docker-compose down
+
+install:
+	@helm install tinyurl ./deploy
+
+uninstall:
+	@helm uninstall tinyurl

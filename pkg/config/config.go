@@ -10,9 +10,10 @@ type Config struct {
 	ClientCertificate string
 	ClientKey         string
 
-	DbAddr    string
+	DbUrl     string
+	DbPort    string
 	DbName    string
-	CacheAddr string
+	CachePort string
 }
 
 func NewConfig() Config {
@@ -24,8 +25,9 @@ func NewConfig() Config {
 	cfg.ServerKey = serverKeyPath
 	cfg.ClientCertificate = clientCertPath
 	cfg.ClientKey = clientKeyPath
-	cfg.DbAddr = dbAddr
+	cfg.DbUrl = dbUrl
+	cfg.DbPort = dbPort
 	cfg.DbName = dbName
-	cfg.CacheAddr = cacheAddr
+	cfg.CachePort = cachePort
 	return cfg
 }

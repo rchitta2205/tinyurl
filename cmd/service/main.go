@@ -7,9 +7,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"os"
 	"sync"
 	"tinyurl/pkg"
 	"tinyurl/pkg/config"
+)
+
+const (
+	mongoSvcEnv = "MONGODB_SERVICE"
+	redisSvcEnv = "REDIS_SERVICE"
 )
 
 func main() {
@@ -21,7 +27,8 @@ func main() {
 	// Initialize the configuration
 	cfg := config.NewConfig()
 
-	dbOptions := options.Client().ApplyURI(cfg.DbAddr)
+	dbUri := cfg.DbUrl + os.Getenv(mongoSvcEnv) + cfg.DbPort
+	dbOptions := options.Client().ApplyURI(dbUri)
 	db, err := mongo.Connect(ctx, dbOptions)
 	if err != nil {
 		logEntry.Warnf("db not initialized, using mock db")
@@ -33,7 +40,8 @@ func main() {
 		}
 	}
 
-	cacheOptions := &redis.Options{Addr: cfg.CacheAddr}
+	cacheAddr := os.Getenv(redisSvcEnv) + cfg.CachePort
+	cacheOptions := &redis.Options{Addr: cacheAddr}
 	cache := redis.NewClient(cacheOptions)
 	err = cache.Ping().Err()
 	if err != nil {

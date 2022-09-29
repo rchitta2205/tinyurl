@@ -1,0 +1,25 @@
+{{- $appName := .Chart.Name }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $appName }}-redis
+  labels:
+    name: {{ $appName }}-redis-svc
+spec:
+  replicas: {{ .Values.redis.replica }}
+  selector:
+    matchLabels:
+      name: {{ $appName }}-redis-svc
+  template:
+    metadata:
+      labels:
+        name: {{ $appName }}-redis-svc
+    spec:
+      containers:
+        - name: {{ $appName }}-redis
+          image: "{{ .Values.image.redis.repository }}:{{ .Values.image.redis.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.redis.port }}
+              protocol: TCP
