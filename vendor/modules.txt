@@ -26,6 +26,11 @@ github.com/grpc-ecosystem/go-grpc-middleware/util/metautils
 github.com/grpc-ecosystem/grpc-gateway/v2/internal/httprule
 github.com/grpc-ecosystem/grpc-gateway/v2/runtime
 github.com/grpc-ecosystem/grpc-gateway/v2/utilities
+# github.com/keybase/saltpack v0.0.0-20200430135328-e19b1910c0c5
+github.com/keybase/saltpack/encoding/basex
+# github.com/keys-pub/keys v0.1.22
+## explicit
+github.com/keys-pub/keys/encoding
 # github.com/klauspost/compress v1.13.6
 github.com/klauspost/compress
 github.com/klauspost/compress/fse
@@ -45,6 +50,9 @@ github.com/pkg/errors
 # github.com/sirupsen/logrus v1.8.1
 ## explicit
 github.com/sirupsen/logrus
+# github.com/tyler-smith/go-bip39 v1.1.0
+github.com/tyler-smith/go-bip39
+github.com/tyler-smith/go-bip39/wordlists
 # github.com/xdg-go/pbkdf2 v1.0.0
 github.com/xdg-go/pbkdf2
 # github.com/xdg-go/scram v1.1.1

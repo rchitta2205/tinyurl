@@ -1,4 +1,4 @@
-.PHONY: protobuf cert service client vendor build up down install uninstall
+.PHONY: protobuf cert service client vendor build up down
 
 vendor:
 	go mod tidy && go mod vendor
@@ -16,16 +16,16 @@ client:
 	go build -o ./bin/tiny-url-client cmd/client/main.go
 
 build:
-	@docker-compose build
+	@docker build -t rchitta2205/tinyurl .
 
-up: build
-	@docker-compose up
+tag:
+	@docker tag rchitta2205/tinyurl rchitta2205/tinyurl
 
-down:
-	@docker-compose down
+push:
+	@docker push rchitta2205/tinyurl
 
-install:
+up: build tag push
 	@helm install tinyurl ./deploy
 
-uninstall:
+down:
 	@helm uninstall tinyurl

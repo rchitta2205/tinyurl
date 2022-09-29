@@ -77,14 +77,18 @@ func main() {
 	wg.Wait()
 
 	// Close the database
-	err = db.Disconnect(ctx)
-	if err != nil {
-		logEntry.Fatalf("Failed to disconnect from the database: %+v", err.Error())
+	if db != nil {
+		err = db.Disconnect(ctx)
+		if err != nil {
+			logEntry.Fatalf("Failed to disconnect from the database: %+v", err.Error())
+		}
 	}
 
 	// Close the cache
-	err = cache.Close()
-	if err != nil {
-		logEntry.Fatalf("Failed to disconnect from the cache: %+v", err.Error())
+	if cache != nil {
+		err = cache.Close()
+		if err != nil {
+			logEntry.Fatalf("Failed to disconnect from the cache: %+v", err.Error())
+		}
 	}
 }
