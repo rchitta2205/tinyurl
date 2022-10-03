@@ -46,6 +46,9 @@ mongo:
   replica: 1
   initDb: database
 
+linkerd:
+  enabled: true
+
 ingress:
   enabled: true
   annotations: {}

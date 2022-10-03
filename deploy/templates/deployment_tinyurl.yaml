@@ -16,6 +16,10 @@ spec:
     metadata:
       labels:
         name: {{ $appName }}-tinyurl-svc
+      annotations:
+        {{- if .Values.linkerd.enabled }}
+        linkerd.io/inject: "enabled"
+        {{- end }}
     spec:
       containers:
         - name: {{ $appName }}-tinyurl

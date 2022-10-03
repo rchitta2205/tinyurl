@@ -14,6 +14,10 @@ spec:
     metadata:
       labels:
         name: {{ $appName }}-redis-svc
+      annotations:
+        {{- if .Values.linkerd.enabled }}
+        linkerd.io/inject: "enabled"
+        {{- end }}
     spec:
       containers:
         - name: {{ $appName }}-redis
