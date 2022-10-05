@@ -2,21 +2,20 @@ package pkg
 
 import (
 	"context"
-	"github.com/go-redis/redis"
+	dapr "github.com/dapr/go-sdk/client"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/mongo"
 	"tinyurl/pkg/application"
 	"tinyurl/pkg/datamodel"
 	"tinyurl/pkg/store"
 )
 
 type applicationManagerBuilder struct {
-	ctx      context.Context
-	logEntry *logrus.Entry
-	db       *mongo.Client
-	dbName   string
-	cache    *redis.Client
+	ctx        context.Context
+	logEntry   *logrus.Entry
+	daprClient dapr.Client
+	db         string
+	cache      string
 }
 
 func NewApplicationManagerBuilder(ctx context.Context) *applicationManagerBuilder {
@@ -32,11 +31,15 @@ func (builder *applicationManagerBuilder) Build() (datamodel.ApplicationManager,
 	}
 
 	var storeManagerOpts []store.StoreManagerOption
-	if builder.db != nil && len(builder.dbName) > 0 {
-		storeManagerOpts = append(storeManagerOpts, store.WithDb(builder.db, builder.dbName))
+	if builder.daprClient != nil {
+		storeManagerOpts = append(storeManagerOpts, store.WithDaprClient(builder.daprClient))
 	}
 
-	if builder.cache != nil {
+	if len(builder.db) != 0 {
+		storeManagerOpts = append(storeManagerOpts, store.WithDb(builder.db))
+	}
+
+	if len(builder.cache) != 0 {
 		storeManagerOpts = append(storeManagerOpts, store.WithCache(builder.cache))
 	}
 
@@ -50,18 +53,18 @@ func (builder *applicationManagerBuilder) WithLogEntry(logEntry *logrus.Entry) *
 	return builder
 }
 
-func (builder *applicationManagerBuilder) WithDb(db *mongo.Client) *applicationManagerBuilder {
-	builder.db = db
+func (builder *applicationManagerBuilder) WithDaprClient(daprClient dapr.Client) *applicationManagerBuilder {
+	builder.daprClient = daprClient
 	return builder
 }
 
-func (builder *applicationManagerBuilder) WithCache(cache *redis.Client) *applicationManagerBuilder {
+func (builder *applicationManagerBuilder) WithCache(cache string) *applicationManagerBuilder {
 	builder.cache = cache
 	return builder
 }
 
-func (builder *applicationManagerBuilder) WithDbName(dbName string) *applicationManagerBuilder {
-	builder.dbName = dbName
+func (builder *applicationManagerBuilder) WithDb(db string) *applicationManagerBuilder {
+	builder.db = db
 	return builder
 }
 

@@ -2,18 +2,17 @@ package store
 
 import (
 	"context"
-	"github.com/go-redis/redis"
+	dapr "github.com/dapr/go-sdk/client"
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/mongo"
 	"tinyurl/pkg/datamodel"
 )
 
 type storeManager struct {
-	ctx      context.Context
-	logEntry *logrus.Entry
-	dbName   string
-	db       *mongo.Client
-	cache    *redis.Client
+	ctx        context.Context
+	logEntry   *logrus.Entry
+	daprClient dapr.Client
+	db         string
+	cache      string
 
 	// List of all singleton stores
 	tinyUrlStore datamodel.TinyUrlStore
@@ -33,18 +32,25 @@ func NewStoreManager(ctx context.Context, logEntry *logrus.Entry, opts ...StoreM
 	return sm
 }
 
-func WithDb(db *mongo.Client, dbName string) StoreManagerOption {
+func WithDaprClient(daprClient dapr.Client) StoreManagerOption {
 	return func(sm *storeManager) {
-		if db != nil && len(dbName) > 0 {
-			sm.db = db
-			sm.dbName = dbName
+		if daprClient != nil {
+			sm.daprClient = daprClient
 		}
 	}
 }
 
-func WithCache(cache *redis.Client) StoreManagerOption {
+func WithDb(db string) StoreManagerOption {
 	return func(sm *storeManager) {
-		if cache != nil {
+		if len(db) != 0 {
+			sm.db = db
+		}
+	}
+}
+
+func WithCache(cache string) StoreManagerOption {
+	return func(sm *storeManager) {
+		if len(cache) != 0 {
 			sm.cache = cache
 		}
 	}
@@ -52,11 +58,10 @@ func WithCache(cache *redis.Client) StoreManagerOption {
 
 func (sm *storeManager) TinyUrlStore() datamodel.TinyUrlStore {
 	if sm.tinyUrlStore == nil {
-		if sm.db == nil || sm.cache == nil || len(sm.dbName) == 0 {
-			sm.tinyUrlStore = NewMockTinyUrlStore()
+		if sm.daprClient == nil || len(sm.db) == 0 || len(sm.cache) == 0 {
+			sm.tinyUrlStore = NewMockTinyUrlStore(sm.logEntry)
 		} else {
-			tinyUrlDb := sm.db.Database(sm.dbName).Collection(tinyUrlCollection)
-			sm.tinyUrlStore = NewTinyUrlStore(sm.ctx, tinyUrlDb, sm.cache, sm.logEntry)
+			sm.tinyUrlStore = NewTinyUrlStore(sm.ctx, sm.daprClient, sm.logEntry, sm.db, sm.cache)
 		}
 	}
 	return sm.tinyUrlStore

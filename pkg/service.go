@@ -3,11 +3,10 @@ package pkg
 import (
 	"context"
 	"crypto/tls"
-	"github.com/go-redis/redis"
+	dapr "github.com/dapr/go-sdk/client"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/codes"
@@ -34,8 +33,7 @@ type grpcService struct {
 	grpcServer *grpc.Server
 	cfg        config.Config
 	logEntry   *logrus.Entry
-	db         *mongo.Client
-	cache      *redis.Client
+	daprClient dapr.Client
 }
 
 type restService struct {
@@ -45,14 +43,12 @@ type restService struct {
 	logEntry   *logrus.Entry
 }
 
-func NewGrpcService(ctx context.Context, cfg config.Config,
-	logEntry *logrus.Entry, db *mongo.Client, cache *redis.Client) Service {
+func NewGrpcService(ctx context.Context, cfg config.Config, logEntry *logrus.Entry, daprClient dapr.Client) Service {
 	return &grpcService{
-		ctx:      ctx,
-		cfg:      cfg,
-		logEntry: logEntry,
-		db:       db,
-		cache:    cache,
+		ctx:        ctx,
+		cfg:        cfg,
+		logEntry:   logEntry,
+		daprClient: daprClient,
 	}
 }
 
@@ -71,9 +67,9 @@ func (s *grpcService) Register() error {
 	// Create the application manager
 	appMgr, err := NewApplicationManagerBuilder(s.ctx).
 		WithLogEntry(s.logEntry).
-		WithDb(s.db).
-		WithDbName(s.cfg.DbName).
-		WithCache(s.cache).Build()
+		WithDaprClient(s.daprClient).
+		WithDb(s.cfg.Db).WithCache(s.cfg.Cache).
+		Build()
 	if err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}
@@ -134,7 +130,9 @@ func (s *grpcService) Serve(wg *sync.WaitGroup) error {
 		defer wg.Done()
 		s.logEntry.Info("Starting gRPC server...")
 		err = s.grpcServer.Serve(grpcLis)
-		s.logEntry.Warn("Grpc Server: " + err.Error())
+		if err != nil {
+			s.logEntry.Warn("Grpc Server: " + err.Error())
+		}
 	}()
 
 	return errors.WithStack(err)
@@ -188,7 +186,9 @@ func (s *restService) Serve(wg *sync.WaitGroup) error {
 		defer wg.Done()
 		s.logEntry.Info("Starting REST server...")
 		err = s.restServer.ListenAndServe()
-		s.logEntry.Warn("Rest Server: " + err.Error())
+		if err != nil {
+			s.logEntry.Warn("Rest Server: " + err.Error())
+		}
 	}()
 	return errors.WithStack(err)
 }

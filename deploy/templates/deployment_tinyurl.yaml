@@ -17,6 +17,14 @@ spec:
       labels:
         name: {{ $appName }}-tinyurl-svc
       annotations:
+        {{- if .Values.dapr.enabled }}
+        dapr.io/enabled: {{ .Values.dapr.enabled | quote }}
+        dapr.io/app-id: "{{ $appName }}-tinyurl-svc"
+        dapr.io/app-port: {{ .Values.dapr.incomingDaprPort | quote }}
+        dapr.io/app-protocol: {{ .Values.dapr.daprProtocol | quote }}
+        dapr.io/sidecar-liveness-probe-delay-seconds: {{ .Values.dapr.sidecar.livenessProbeDelay | quote }}
+        dapr.io/sidecar-liveness-probe-timeout-seconds: {{ .Values.dapr.sidecar.livenessProbeTimeout | quote }}
+        {{- end }}
         {{- if .Values.linkerd.enabled }}
         linkerd.io/inject: "enabled"
         {{- end }}
@@ -29,6 +37,7 @@ spec:
             - configMapRef:
                 name: {{ $appName }}-tinyurl
           ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
+            - containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            - containerPort: {{ .Values.dapr.incomingDaprPort }}
               protocol: TCP

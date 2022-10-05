@@ -1,0 +1,15 @@
+{{- $appName := .Chart.Name }}
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: mongo
+spec:
+  type: state.mongodb
+  version: v1
+  metadata:
+    - name: host
+      value: "{{ $appName }}-mongo-svc:27017"
+    - name: databaseName
+      value: "{{ .Values.mongo.initDb }}"
+    - name: collectionName
+      value: "{{ .Values.mongo.collection }}"

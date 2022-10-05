@@ -9,8 +9,8 @@ const (
 	clientKeyPath  = "cert/client-alice-key.pem"
 	serverCertPath = "cert/server-cert.pem"
 	serverKeyPath  = "cert/server-key.pem"
-	dbUrl          = "mongodb://"
-	dbPort         = ":27017"
-	dbName         = "database"
-	cachePort      = ":6379"
+	db             = "mongo"
+	cache          = "redis"
+	daprAddr       = "127.0.0.1"
+	daprPort       = "50001"
 )

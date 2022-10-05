@@ -1,8 +1,8 @@
 package datamodel
 
 type Url struct {
-	TinyUrl string `json:"tiny_url" bson:"tiny_url"`
-	LongUrl string `json:"long_url" bson:"long_url"`
+	TinyUrl string
+	LongUrl string
 }
 
 type TinyUrlApplication interface {

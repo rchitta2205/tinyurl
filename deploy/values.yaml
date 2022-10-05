@@ -45,9 +45,20 @@ mongo:
   port: 27017
   replica: 1
   initDb: database
+  collection: tiny
 
 linkerd:
   enabled: true
+
+dapr:
+  enabled: true
+  incomingDaprPort: "8081"
+  daprProtocol: "grpc"
+  mongo: "mongo-db"
+  redis: "redis-cache"
+  sidecar:
+    livenessProbeDelay: "30"
+    livenessProbeTimeout: "15"
 
 ingress:
   enabled: true
