@@ -2,6 +2,8 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+replicaCount: 2
+
 image:
   tinyurl:
     repository: rchitta2205/tinyurl
@@ -15,6 +17,10 @@ image:
     repository: mongo
     pullPolicy: Always
     tag: 4.4.5
+  test:
+    repository: rchitta2205/test-tinyurl
+    pullPolicy: Always
+    tag: latest
 
 imagePullSecrets: []
 nameOverride: ""
@@ -52,8 +58,6 @@ linkerd:
 
 dapr:
   enabled: true
-  incomingDaprPort: "8081"
-  daprProtocol: "grpc"
   mongo: "mongo-db"
   redis: "redis-cache"
   sidecar:
@@ -76,13 +80,6 @@ resources: {}
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
-
-autoscaling:
-  enabled: true
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
 
 nodeSelector: {}
 

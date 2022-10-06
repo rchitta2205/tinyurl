@@ -2,23 +2,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $appName }}-tinyurl
+  name: {{ $appName }}-test
   labels:
-    name: {{ $appName }}-tinyurl-svc
+    name: {{ $appName }}-test-svc
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
-      name: {{ $appName }}-tinyurl-svc
+      name: {{ $appName }}-test-svc
   template:
     metadata:
       labels:
-        name: {{ $appName }}-tinyurl-svc
+        name: {{ $appName }}-test-svc
       annotations:
         {{- if .Values.dapr.enabled }}
         dapr.io/enabled: {{ .Values.dapr.enabled | quote }}
-        dapr.io/app-id: "{{ $appName }}-tinyurl-svc"
-        dapr.io/app-port: "{{ .Values.service.port }}"
+        dapr.io/app-id: "{{ $appName }}-test-svc"
         dapr.io/sidecar-liveness-probe-delay-seconds: {{ .Values.dapr.sidecar.livenessProbeDelay | quote }}
         dapr.io/sidecar-liveness-probe-timeout-seconds: {{ .Values.dapr.sidecar.livenessProbeTimeout | quote }}
         {{- end }}
@@ -27,9 +26,12 @@ spec:
         {{- end }}
     spec:
       containers:
-        - name: {{ $appName }}-tinyurl
-          image: "{{ .Values.image.tinyurl.repository }}:{{ .Values.image.tinyurl.tag | default .Chart.AppVersion }}"
+        - name: {{ $appName }}-test
+          image: "{{ .Values.image.test.repository }}:{{ .Values.image.test.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ $appName }}-test
           ports:
             - containerPort: {{ .Values.service.port }}
               protocol: TCP

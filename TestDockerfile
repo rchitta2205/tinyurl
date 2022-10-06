@@ -1,0 +1,12 @@
+FROM golang:1.16.3-alpine3.13 AS GO_BUILD
+RUN apk update && apk add build-base
+COPY . /tinyurl
+WORKDIR /tinyurl
+RUN go build -o ./bin/test test/main.go
+
+FROM alpine:3.13.5
+COPY --from=GO_BUILD /tinyurl ./tinyurl
+WORKDIR /tinyurl
+RUN pwd
+RUN ls
+CMD ./bin/test

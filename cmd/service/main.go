@@ -20,8 +20,10 @@ func main() {
 	cfg := config.NewConfig()
 
 	daprClient, err := util.Connect(ctx, net.JoinHostPort(cfg.DaprAddr, cfg.DaprPort))
-	if err != nil || daprClient == nil {
+	if err != nil {
 		logEntry.Warnf("dapr not initialized, using mock db and cache: %+v", err.Error())
+	} else if daprClient == nil {
+		logEntry.Warn("dapr not initialized, using mock db and cache")
 	}
 
 	if daprClient != nil {

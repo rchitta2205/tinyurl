@@ -5,6 +5,10 @@ type Url struct {
 	LongUrl string
 }
 
+type Response struct {
+	Url string `json:"url"`
+}
+
 type TinyUrlApplication interface {
 	Create(string) (string, error)
 	Fetch(string) (string, error)
