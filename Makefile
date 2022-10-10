@@ -39,8 +39,10 @@ push:
 test-push:
 	@docker push rchitta2205/test-tinyurl
 
-up: build tag push test-build test-tag test-push
+install:
 	@helm install tinyurl ./deploy
+
+up: build tag push test-build test-tag test-push install
 
 down:
 	@helm uninstall tinyurl

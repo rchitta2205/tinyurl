@@ -16,8 +16,9 @@ type user struct {
 var (
 	methodDb = method{
 		permissions: map[string][]string{
-			"/TinyUrlService/Create": {"admin"},
-			"/TinyUrlService/Fetch":  {"admin", "user"},
+			"/TinyUrlService/Create":       {"admin"},
+			"/TinyUrlService/Fetch":        {"admin", "user"},
+			"/grpc.health.v1.Health/Check": {"admin", "user"},
 		},
 	}
 

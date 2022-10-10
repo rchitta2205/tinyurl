@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 	"net"
@@ -80,6 +81,11 @@ func (s *grpcService) Register() error {
 		return errors.WithStack(err)
 	}
 
+	healthServer, err := server.NewHealthServer(s.logEntry)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
 	// Create all the interceptors
 	authInterceptor := interceptor.NewAuthInterceptor(appMgr.AuthApplication(), s.logEntry)
 
@@ -112,6 +118,7 @@ func (s *grpcService) Register() error {
 
 	// Register the grpc app servers
 	proto.RegisterTinyUrlServiceServer(s.grpcServer, tinyUrlServer)
+	grpc_health_v1.RegisterHealthServer(s.grpcServer, healthServer)
 
 	s.logEntry.Info("Registered Grpc servers")
 	return nil
@@ -139,9 +146,6 @@ func (s *grpcService) Serve(wg *sync.WaitGroup) error {
 }
 
 func (s *restService) Register() error {
-	// Creating mux for gRPC gateway. This will multiplex or route request different gRPC service
-	mux := runtime.NewServeMux()
-
 	// Reverse proxy Rest service calls the gRPC client so needs the client certificates
 	cert, certPool, err := util.LoadTLSCredentials(s.cfg.CertAuthority, s.cfg.ClientCertificate, s.cfg.ClientKey)
 	if err != nil {
@@ -155,6 +159,7 @@ func (s *restService) Register() error {
 		MinVersion:   tls.VersionTLS13,
 	}
 
+	// Creating the dial options to call the gRPC client
 	options := []grpc.DialOption{
 		grpc.WithBlock(),
 		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
@@ -163,8 +168,22 @@ func (s *restService) Register() error {
 		}),
 	}
 
-	// Setting up a dial-up for gRPC service by specifying endpoint/target url
-	err = proto.RegisterTinyUrlServiceHandlerFromEndpoint(s.ctx, mux, s.cfg.GrpcServerPort, options)
+	// Dialing the gRPC service and establishing a connection
+	conn, err := grpc.DialContext(s.ctx, s.cfg.GrpcServerPort, options...)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	// Define the server options for creating the mux
+	serverOpts := []runtime.ServeMuxOption{
+		runtime.WithHealthzEndpoint(grpc_health_v1.NewHealthClient(conn)),
+	}
+
+	// Creating mux for gRPC gateway. This will multiplex or route request to different gRPC services
+	mux := runtime.NewServeMux(serverOpts...)
+
+	// Registering the tiny url grpc service with the mux and the grpc connection
+	err = proto.RegisterTinyUrlServiceHandler(s.ctx, mux, conn)
 	if err != nil {
 		return errors.WithStack(err)
 	}

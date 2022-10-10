@@ -5,7 +5,6 @@ import "google/protobuf/empty.proto";
 
 option go_package = ".;proto";
 
-
 message UrlRequest {
   string url = 1;
 }

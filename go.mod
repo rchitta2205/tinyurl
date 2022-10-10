@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/dapr/go-sdk v1.5.0
 	github.com/gofrs/uuid v4.0.0+incompatible
+	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
 	github.com/keys-pub/keys v0.1.22

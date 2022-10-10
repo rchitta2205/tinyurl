@@ -6,7 +6,7 @@ metadata:
   labels:
     name: {{ $appName }}-test-svc
 spec:
-  replicas: 1
+  replicas: 15
   selector:
     matchLabels:
       name: {{ $appName }}-test-svc
@@ -35,3 +35,19 @@ spec:
           ports:
             - containerPort: {{ .Values.service.port }}
               protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
